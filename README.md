@@ -1,2 +1,2 @@
-# slugplots
+# slugplot
 Python visualization tools

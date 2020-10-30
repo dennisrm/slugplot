@@ -1,0 +1,2 @@
+# slugplots
+Python visualization tools

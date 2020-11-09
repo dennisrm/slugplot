@@ -22,23 +22,28 @@ class Upset:
         
         fig_cat_height = 0.4*len(category_dict)
         fig_bar_height = 3
-        fig_width = 12
-        fig_height = fig_cat_height + fig_bar_height + 0.5
+        fig_bar_width = 0.5*len(self.groups)
+        fig_width = 3.5 + fig_bar_width
+        fig_height = fig_cat_height + fig_bar_height + 0.65
         
         self.figure = plt.figure(figsize=(fig_width,fig_height))
+        self.figure.patch.set_facecolor("white")
 
         cat_height = fig_cat_height/fig_height
         bar_height = fig_bar_height/fig_height
-        catbar_width = 0.15
-        cat_width = 0.1
-        bar_width = 1 - (catbar_width + cat_width)
-        left = 1 - bar_width
+        catbar_width = 1.5/fig_width
+        cat_width = 1.2/fig_width
+        bar_width = fig_bar_width / fig_width
+        title_width = 2/fig_width
+        side_margin = 0.15/fig_width
+        left = cat_width+catbar_width+side_margin
+        height_margin = 0.3/fig_height
         
-        self.titlebox = plt.axes([0,cat_height+0.05,catbar_width,bar_height],frameon=False)
-        self.bar = plt.axes([left, cat_height+.05, bar_width, bar_height])
-        self.dots = plt.axes([left, 0, bar_width, cat_height])
-        self.catbar = plt.axes([0,0,catbar_width,cat_height])
-        self.cats = plt.axes([catbar_width, 0, cat_width, cat_height],frameon=False)
+        self.titlebox = plt.axes([side_margin,cat_height+2*height_margin,title_width,bar_height],frameon=False)
+        self.bar = plt.axes([left, cat_height+2*height_margin, bar_width, bar_height])
+        self.dots = plt.axes([left, height_margin, bar_width, cat_height])
+        self.catbar = plt.axes([side_margin,height_margin,catbar_width,cat_height])
+        self.cats = plt.axes([catbar_width+side_margin, height_margin, cat_width, cat_height],frameon=False)
                 
     def intersection_sizes(self,category_dict):
         """Parse elements from categories to determine numbers of overlapping elements"""
@@ -51,7 +56,7 @@ class Upset:
                     matches[element] = [category]
         intersections = {}
         for element,group in matches.items():
-            group = tuple(group)
+            group = tuple(sorted(set(group)))
             try:
                 intersections[group].append(element)
             except KeyError:
@@ -59,7 +64,8 @@ class Upset:
         return {group:len(elements) for group,elements in intersections.items()}
 
     def title(self,label):
-        self.titlebox.text(0,0,label,horizontalalignment='center',verticalalignment='center')
+        self.titlebox.text(0,0,label,fontsize=11,
+                           horizontalalignment='center',verticalalignment='center')
         self.titlebox.set_xlim(-1,1)
         self.titlebox.set_ylim(-1,1)
         self.titlebox.axis("off")
@@ -103,10 +109,6 @@ class Upset:
 
             self.dots.plot(xs,ys,linewidth=3,marker="o",markersize=15,color="black")
 
-    def colorDots(self,category,color):
-        for i,group in enumerate(self.group_order):
-            if category in group:
-                self.dots.plot(i,self.cat_order[category],marker="o",markersize=13,color = color)
        
     def intersectionBars(self):
         num_bars = len(self.group_order)
@@ -119,8 +121,22 @@ class Upset:
         self.bar.set_xlim(-.5,num_bars-.5)
         self.bar.set_xticklabels([self.intersections[g] for g in self.group_order])
         self.bar.set_xticks(range(num_bars))
-        self.bar.tick_params(length=0)
+        self.bar.tick_params('x',length=0)
+        self.bar.locator_params(axis='y', nbins=4)
         self.bar.set_ylabel("Size of Intersection")
+        
+        
+    def categoryBars(self):
+        xs,ys = [],[]
+        for tool,count in self.cat_counts.items():
+            ys.append(self.cat_order[tool])
+            xs.append(count)
+        self.catbar.barh(ys,xs,color=(.5,.5,.5))
+        self.catbar.set_xlim(max(xs)*1.1,0)
+        self.catbar.set_ylim(len(self.cat_order)-.5,-.5)
+        self.catbar.set_yticks([])
+        self.catbar.set_title("Size of Group",fontsize=10)
+
         
     def colorBars(self,category,color):
         xs,ys = [],[]
@@ -135,18 +151,13 @@ class Upset:
 
         self.bar.bar(xs,ys,color=color,edgecolor=(.4,.4,.4))
         
+        
+    def colorDots(self,category,color):
+        for i,group in enumerate(self.group_order):
+            if category in group:
+                self.dots.plot(i,self.cat_order[category],marker="o",markersize=13,color = color)
+        
 
-
-    def categoryBars(self):
-        xs,ys = [],[]
-        for tool,count in self.cat_counts.items():
-            ys.append(self.cat_order[tool])
-            xs.append(count)
-        self.catbar.barh(ys,xs,color=(.5,.5,.5))
-        self.catbar.set_xlim(max(xs)*1.1,0)
-        self.catbar.set_ylim(len(self.cat_order)-.5,-.5)
-        self.catbar.set_yticks([])
-        self.catbar.set_xlabel("Size of Group")
 
     
     def show(self):

@@ -3,6 +3,9 @@ Python visualization tools
 
 # upset.py
 For making upset plots for visualization intersection sizes for multiple sets
+
+### Example
+![Example Plot](/example_upset_party2020.png)
 ### Usage
 import upset
 

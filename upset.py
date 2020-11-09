@@ -20,9 +20,9 @@ class Upset:
  
         self.cat_order = {cat:i for i,cat in enumerate(category_dict.keys())}
         
-        fig_cat_height = 0.4*len(category_dict)
+        fig_cat_height = 0.35*len(category_dict)
         fig_bar_height = 3
-        fig_bar_width = 0.5*len(self.groups)
+        fig_bar_width = 0.45*len(self.groups)
         fig_width = 3.5 + fig_bar_width
         fig_height = fig_cat_height + fig_bar_height + 0.65
         
